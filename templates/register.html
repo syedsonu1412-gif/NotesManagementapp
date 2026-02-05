@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+
+
+            <div class="card-body p-1">
+                <h4 class="card-title mb-1 text-center">Create an account</h4>
+
+                <form method="POST"><div class="container flex-grow-1 d-flex justify-content-center align-items-center mt-3">
+    <div class="card shadow p-1" style="width: 400px; background-color:#c8f5f7;">
+                    <div class="mb-1">
+                        <label class="form-label">First Name</label>
+                        <input name="firstname" class="form-control" required>
+
+                        <label class="form-label">Last Name</label>
+                        <input name="lastname" class="form-control" required>
+
+                        <label class="form-label">Username</label>
+                        <input name="username" class="form-control" required>
+                    </div>
+
+                    <div class="mb-1">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+
+                    <div class="mb-1">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+
+                    <button class="btn btn-success w-100" type="submit">Register</button>
+                </form>
+
+                <p class="mt-1 text-center">
+                    Already registered?
+                    <a href="{{ url_for('login') }}">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

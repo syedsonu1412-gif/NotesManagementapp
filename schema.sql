@@ -1,0 +1,26 @@
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ username TEXT NOT NULL UNIQUE,
+ email TEXT NOT NULL UNIQUE,
+ password TEXT NOT NULL
+);
+
+-- Notes table
+CREATE TABLE IF NOT EXISTS notes (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ title TEXT NOT NULL,
+ content TEXT NOT NULL,
+ user_id INTEGER NOT NULL,
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+-- Password reset tokens
+CREATE TABLE IF NOT EXISTS password_resets (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ user_id INTEGER NOT NULL,
+ token TEXT NOT NULL,
+ expires_at TIMESTAMP NOT NULL,
+ FOREIGN KEY (user_id) REFERENCES users (id)
+);

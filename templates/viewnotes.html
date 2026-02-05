@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}All Notes{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+
+<form action="{{ url_for('search') }}" method="get" style="
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:6px;
+ margin:10px auto;
+ ">
+
+  <input type="text" name="q" placeholder="Search notes..." value="{{ search_text or '' }}" style="
+ width:460px;
+ height:43px;
+ font-size:14px;
+ padding:0 10px;
+ border-radius:6px;
+ border:1px solid hashtag#ccc;
+ box-sizing:border-box;
+ ">
+
+  <button type="submit" style="
+ height:38px;
+ width:38px;
+ border:none;
+ border-radius:6px;
+ background:blue;
+ color:blue;
+ cursor:pointer;
+ font-size:18px;
+ line-height:2;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ margin-top:4px;
+ " title="Search">
+    🔍
+  </button>
+
+</form>
+<!-- Notes Heading -->
+<h3 class="mt-4 mb-4 text-center">My Notes</h3>
+
+<!-- Notes Grid -->
+<div class="row">
+  {% if notes %}
+  {% for note in notes %}
+  <div class="col-md-7 col-lg-4 mb-4">
+    <div class="card h-100 shadow-sm bg-info bg-opacity-25">
+      <div class="card-body d-flex flex-column">
+
+        <h5 class="card-title">{{ note.title }}</h5>
+        <p class="card-text text-truncate">{{ note.content }}</p>
+
+        <p class="mt-auto mb-1 text-muted small">
+          {{ note.created_at }}
+        </p>
+
+        <div class="mt-2 d-flex gap-2">
+          <a class="btn btn-sm btn-warning" href="{{ url_for('updatenote', note_id=note.id) }}">
+            Edit
+          </a>
+
+          <form action="{{ url_for('deletenote', note_id=note.id) }}" method="POST" class="d-inline">
+            <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Delete this note?')">
+              Delete
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <!-- No Notes Found -->
+  <div class="col-md-5 col-lg-6 mb-3 mx-auto">
+  <div class="card shadow-sm bg-info bg-opacity-25 ">
+    <div class="card h-150 shadow-sm bg-light border border-info">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+        <p class="text-muted mb-5">No notes found here....</p>
+        <a href="{{ url_for('addnote') }}" class="btn btn-info btn-sm">
+          Create a note
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
