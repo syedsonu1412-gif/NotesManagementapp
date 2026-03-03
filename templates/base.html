@@ -8,6 +8,45 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* Navbar brand smaller on mobile */
+        .navbar-brand {
+            font-size: 1.2rem;
+        }
+
+        /* Flash messages responsive padding */
+        .alert {
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        /* Footer font size */
+        footer {
+            font-size: 0.9rem;
+        }
+
+        /* Make tables scrollable on small screens */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Center navbar links in hamburger menu */
+        .navbar-collapse {
+            text-align: center;
+        }
+
+        .navbar-nav {
+            flex-direction: column; /* Stack vertically on mobile */
+        }
+
+        @media(min-width: 992px) {
+            .navbar-nav {
+                flex-direction: row; /* Horizontal on desktop */
+                text-align: left;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
@@ -18,15 +57,16 @@
     <a class="navbar-brand" href="{{ url_for('viewall') }}">📗 NotesTrack</a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarNav">
+            data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav mx-auto text-center">
         {% if session.get('username') %}
           <li class="nav-item">
-            <span class="nav-link disabled">Hi, {{ session.get('username') }}</span>
+            <span class="nav-link disabled text-white">Hi, {{ session.get('username') }}</span>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('addnote') }}">Add Note</a>
@@ -35,7 +75,9 @@
             <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
           </li>
         {% else %}
-          
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">LOGIN</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('about') }}">ABOUT</a>
           </li>
@@ -49,15 +91,15 @@
 </nav>
 
 <!-- Page Content -->
-<main class="container mb-5 flex-grow-1">
+<main class="container mb-5 flex-grow-1 py-3">
 
     <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -67,9 +109,9 @@
 </main>
 
 <!-- Footer -->
-<footer class="bg-primary text-dark mt-auto py-3">
+<footer class="bg-primary text-white mt-auto py-3">
     <div class="container text-center">
-        <p class="mb-1">Copyright© 2026 <strong>DESIGNED BY SONUSYED</strong>. All rights reserved.</p>
+        <p class="mb-1">© 2026 <strong>DESIGNED BY SONUSYED</strong>. All rights reserved.</p>
         <p class="small mb-0">Built with patience using Flask, MySQL, and Bootstrap.</p>
     </div>
 </footer>
