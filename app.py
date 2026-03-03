@@ -1,13 +1,9 @@
-
-
-
-
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
-
+import sqlite3
 
 # --------------------
 # App Initialization
@@ -22,7 +18,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = "syedsonu2278@gmail.com"
-app.config['MAIL_PASSWORD'] = "sqryzmjkhahrzzzr"
+app.config['MAIL_PASSWORD'] = "nkkfnqmeceehdbnb"
 app.config['MAIL_DEFAULT_SENDER'] = 'syedsonu2278@gmail.com'
 
 mail = Mail(app)
@@ -30,7 +26,7 @@ mail = Mail(app)
 # --------------------
 # Token Serializer
 # --------------------
-s = URLSafeTimedSerializer(app.secret_key)
+serializer = URLSafeTimedSerializer(app.secret_key)
 
 # --------------------
 # SQLite Database Connection
@@ -68,12 +64,21 @@ def register():
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # ✅ Check username
+        cur.execute("SELECT id FROM users WHERE username=?", (username,))
+        if cur.fetchone():
+            flash("Username already taken", "danger")
+            conn.close()
+            return redirect('/register')
+
+        # ✅ Check email
         cur.execute("SELECT id FROM users WHERE email=?", (email,))
         if cur.fetchone():
             flash("Email already registered", "danger")
             conn.close()
             return redirect('/register')
 
+        # ✅ Insert user
         cur.execute(
             "INSERT INTO users (username, email, password) VALUES (?,?,?)",
             (username, email, hashed_pw)
@@ -124,7 +129,6 @@ def login():
 @app.route('/about')
 def about():
     return render_template('about.html')
-
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
@@ -160,8 +164,6 @@ Message:
     return render_template('contact.html')
 
 
-
-
 # --------------------
 # Forgot Password
 # --------------------
@@ -172,23 +174,19 @@ def forgot_password():
 
         conn = get_db_connection()
         cur = conn.cursor()
-
-        cur.execute("SELECT * FROM users WHERE email=?", (email,))
+        cur.execute("SELECT username FROM users WHERE email = ?", (email,))
         user = cur.fetchone()
         conn.close()
 
         if user:
-            token = s.dumps(email, salt='password-reset-salt')
+            token = serializer.dumps(email, salt='password-reset-salt')
 
-            reset_link = url_for(
-                'reset_with_token',
-                token=token,
-                _external=True
-            )
+            reset_link = url_for('reset_with_token',
+                                 token=token,
+                                 _external=True)
 
             msg = Message(
                 subject="Reset Your Password",
-                sender=app.config['MAIL_USERNAME'],
                 recipients=[email]
             )
 
@@ -196,49 +194,61 @@ def forgot_password():
 Hello {user['username']},
 
 Click the link below to reset your password:
+
 {reset_link}
 
 This link will expire in 1 hour.
 """
-            mail.send(msg)
 
-        flash("If the email exists, a reset link has been sent.", "info")
-        return redirect(url_for('login'))
+            try:
+                mail.send(msg)
+                print("Mail sent successfully")
+            except Exception as e:
+                print("Mail sending failed:", e)
+
+        flash("If the email exists, a reset link has been sent.", "success")
+        return redirect(url_for('forgot_password'))
 
     return render_template('forgot_password.html')
-
 # --------------------
 # Reset Password
 # --------------------
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_with_token(token):
     try:
-        email = s.loads(token, salt='password-reset-salt', max_age=3600)
-    except:
+        email = serializer.loads(
+            token,
+            salt='password-reset-salt',
+            max_age=3600
+        )
+    except Exception:
         flash("The reset link is invalid or expired.", "danger")
         return redirect(url_for('forgot_password'))
 
     if request.method == 'POST':
-        new_password = request.form['password']
-        hashed_password = generate_password_hash(new_password)
+        password = request.form['password']
+        confirm = request.form['confirm_password']
+
+        if password != confirm:
+            flash("Passwords do not match!", "danger")
+            return redirect(request.url)
+
+        hashed_password = generate_password_hash(password)
 
         conn = get_db_connection()
         cur = conn.cursor()
-
         cur.execute(
-            "UPDATE users SET password=? WHERE email=?",
+            "UPDATE users SET password = ? WHERE email = ?",
             (hashed_password, email)
         )
-
         conn.commit()
         conn.close()
 
-        flash("Your password has been updated!", "success")
+        flash("Your password has been updated successfully! Please login.", "success")
         return redirect(url_for('login'))
 
     return render_template('reset_password.html')
-
-# --------------------
+#------------------
 # Logout
 # --------------------
 @app.route('/logout')
@@ -383,3 +393,4 @@ def search():
 # --------------------
 if __name__ == '__main__':
     app.run(debug=True)
+
